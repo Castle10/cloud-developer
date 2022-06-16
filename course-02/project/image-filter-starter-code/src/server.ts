@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { fileURLToPath } from 'url';
 
 (async () => {
 
@@ -26,7 +27,25 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //    image_url: URL of a publicly accessible image
   // RETURNS
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
+  // Solution
+  app.get("/filteredimage", async (req, res) => {
+    let imageRequest = req.query.image_url;
+    if (!imageRequest) {
+      return res.status(400).send("Url Is required!")
+    }
+    var filterfun = function (img, callback){
+      var filteredpath = filterImageFromURL(img);
+      callback([filteredpath]);    
+    };
+    
+    
+    await filterfun(imageRequest, deleteLocalFiles);
 
+    let filteredpath = await filterImageFromURL(imageRequest);
+    res.sendFile(filteredpath);
+    deleteLocalFiles([filteredpath]);
+    
+  });
   /**************************************************************************** */
 
   //! END @TODO1
@@ -44,3 +63,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
       console.log( `press CTRL+C to stop server` );
   } );
 })();
+
+function image_url(image_url: any) {
+  throw new Error('Function not implemented.');
+}
